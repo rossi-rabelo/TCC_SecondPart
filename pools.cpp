@@ -45,16 +45,18 @@ int main ( int argc, char** argv ) {
 	int linhas = image.rows;
 	int colunas = image.cols;
 
-	cv:: Mat hsv_image;
-	hsv_image = convertehsv(image); //Convertendo a imagem para hsv
-	
+	cv::Mat rgb[3];
+	split(image,rgb); //Separando os canais rgb da imagem
 
+	cv::Mat blueFilter = rgb[0] - (rgb[1] + rgb[2])/2;
 	/***************************************************************************************************************************/
+	// Binarizando a imagem resultante pelo método de otsu
+	cv::Mat threshold;
+	cv::threshold(blueFilter, threshold, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+
 	/*Escrevendo a imagem resultante*/
-
-	cv:: imwrite("test_hsv.jpg", hsv_image);
-
-
+	
+	imwrite("../result.JPG", threshold);
 	cv::waitKey(0);
     return 0;
 }
