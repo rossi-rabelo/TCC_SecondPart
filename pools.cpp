@@ -35,7 +35,7 @@ cv::Mat convertehsv(Mat image){     //Função para converter uma imagem de rgb 
 int main ( int argc, char** argv ) {
 
     cv::Mat image;
-	image = leimagem("../imteste1.JPG");
+	image = leimagem("../imteste2.JPG");
 	 // Se não for possível abrir a imagem
 	if(! image.data ) {
 	      std::cout <<  "Could not open or find the image" << std::endl ;
@@ -51,12 +51,22 @@ int main ( int argc, char** argv ) {
 	cv::Mat blueFilter = rgb[0] - (rgb[1] + rgb[2])/2;
 	/***************************************************************************************************************************/
 	// Binarizando a imagem resultante pelo método de otsu
-	cv::Mat threshold;
-	cv::threshold(blueFilter, threshold, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+	cv::Mat otsu_image;
+	cv::threshold(blueFilter, otsu_image, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+
+	// Binarizando a imagem utilizando um limiar de valor 30
+	cv::Mat segmented_image;
+	cv::threshold(blueFilter, segmented_image, 30, 255, CV_THRESH_BINARY);
+
+	// Fazendo a operação de "e lógico" entre as duas imagens
+	cv::Mat threshold_image;
+	threshold_image = otsu_image & segmented_image;
 
 	/*Escrevendo a imagem resultante*/
 	
-	imwrite("../result.JPG", threshold);
+	imwrite("../result.JPG", threshold_image);
+	imwrite("../resultotsu.JPG", otsu_image);
+	imwrite("../resultseg.JPG", segmented_image);
 	cv::waitKey(0);
     return 0;
 }
