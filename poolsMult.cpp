@@ -79,7 +79,7 @@ int main ( int argc, char** argv ) {
 	ss << cont;
 	string str = ss.str();
 	
-	String saida = ".//saida//" + nome;
+	String saida = "..//saida//" + nome;
 	cv:: imwrite(saida, threshold);
 	ss.str("");
 	cont++;
