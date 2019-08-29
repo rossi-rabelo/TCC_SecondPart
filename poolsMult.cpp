@@ -69,8 +69,17 @@ int main ( int argc, char** argv ) {
 	cv::Mat blueFilter = rgb[0] - (rgb[1] + rgb[2])/2;
 	/***************************************************************************************************************************/
 	// Binarizando a imagem resultante pelo método de otsu
-	cv::Mat threshold;
-	cv::threshold(blueFilter, threshold, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+	cv::Mat otsu_image;
+	cv::threshold(blueFilter, otsu_image, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+
+	// Binarizando a imagem utilizando um limiar de valor 30
+	cv::Mat segmented_image;
+	cv::threshold(blueFilter, segmented_image, 30, 255, CV_THRESH_BINARY);
+
+	// Fazendo a operação de "e lógico" entre as duas imagens
+	cv::Mat threshold_image;
+	threshold_image = otsu_image & segmented_image;
+
 
 	/*Escrevendo a imagem resultante*/
 	
@@ -79,8 +88,8 @@ int main ( int argc, char** argv ) {
 	ss << cont;
 	string str = ss.str();
 	
-	String saida = "..//saida//" + nome;
-	cv:: imwrite(saida, threshold);
+	String saida = "..//saida2//" + nome;
+	cv:: imwrite(saida, threshold_image);
 	ss.str("");
 	cont++;
 			
