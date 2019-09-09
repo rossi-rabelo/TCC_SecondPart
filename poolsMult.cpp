@@ -39,14 +39,14 @@ int main ( int argc, char** argv ) {
 	
 		DIR *dir;
 		struct dirent *lsdir;
-		dir = opendir("../voo-30metros");
+		dir = opendir("../voo-60metros");
 		while ((lsdir = readdir(dir))!= NULL)
 		{
 		if (strcmp(lsdir->d_name,"..") == 0 || strcmp(lsdir->d_name,".") == 0){
 			continue;
 		}else{
 		char nomedir[50];
-		strcpy(nomedir, "..//voo-30metros//");
+		strcpy(nomedir, "..//voo-60metros//");
 		strcat(nomedir, lsdir->d_name);
 		cout << lsdir->d_name << endl;
 		String nome = lsdir->d_name;
@@ -66,6 +66,7 @@ int main ( int argc, char** argv ) {
 	cv::Mat rgb[3];
 	split(image,rgb); //Separando os canais rgb da imagem
 
+	//BGR
 	cv::Mat blueFilter = rgb[0] - (rgb[1] + rgb[2])/2;
 	/***************************************************************************************************************************/
 	// Binarizando a imagem resultante pelo método de otsu
@@ -76,10 +77,15 @@ int main ( int argc, char** argv ) {
 	cv::Mat segmented_image;
 	cv::threshold(blueFilter, segmented_image, 30, 255, CV_THRESH_BINARY);
 
+	// Obtendo azuis com tons esverdeados na imagem
+	cv:: Mat blueFilter2 = ((rgb[1] - rgb[2]) > 50) & (rgb[0] > 140);
+
 	// Fazendo a operação de "e lógico" entre as duas imagens
 	cv::Mat threshold_image;
 	threshold_image = otsu_image & segmented_image;
 
+	cv::Mat result_image;
+	result_image = blueFilter2 | threshold_image;
 
 	/*Escrevendo a imagem resultante*/
 	
@@ -88,8 +94,8 @@ int main ( int argc, char** argv ) {
 	ss << cont;
 	string str = ss.str();
 	
-	String saida = "..//saida2//" + nome;
-	cv:: imwrite(saida, threshold_image);
+	String saida = "..//saida60m2//" + nome;
+	cv:: imwrite(saida, result_image);
 	ss.str("");
 	cont++;
 			
