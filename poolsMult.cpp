@@ -30,6 +30,36 @@ cv::Mat convertehsv(Mat image){     //Função para converter uma imagem de rgb 
 /*****************************************************************************************************************************************************************/
 
 
+cv::Mat erode_imagem(Mat image) {	//Função para erodir a imagem e eliminar objetos irrelevantes
+	
+	cv:: Mat erodedImage;
+
+	int raio = 15; // Raio da erosão
+	Mat element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size((2 * raio)+1,(2 * raio)+1), Point(-1,-1));	//Definindo a matriz de dilatação.
+
+	cv::erode(image, erodedImage, element, Point(-1, -1), 1, 1, 1);
+
+	return erodedImage;
+}
+
+/*****************************************************************************************************************************************************************/
+
+cv::Mat dilata_imagem(Mat someImage){    //Função que irá dilatar a imagem no raio escolhido;
+
+    cv::Mat dilated_image;
+
+ 	int raio = 15;	//Raio da dilatação.
+	
+	Mat element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size((2 * raio)+1,(2 * raio)+1), Point(-1,-1));	//Definindo a matriz de dilatação.
+
+	cv::dilate(someImage, dilated_image, element, Point(-1, -1), 1, 1, 1);
+
+    return dilated_image;
+}
+
+/*****************************************************************************************************************************************************************/
+
+
 int main ( int argc, char** argv ) {
 
     struct dirent **namelist;
@@ -84,8 +114,17 @@ int main ( int argc, char** argv ) {
 	cv::Mat threshold_image;
 	threshold_image = otsu_image & segmented_image;
 
-	cv::Mat result_image;
-	result_image = blueFilter2 | threshold_image;
+	cv::Mat binary_image;
+	binary_image = blueFilter2 | threshold_image;
+
+	// Erodir e dilatar a imagem resultante a fim de eliminar objetos irrelevantes
+
+	cv::Mat eroded_image;
+	eroded_image = erode_imagem(binary_image);
+	
+	// Etapa de dilatação
+	cv::Mat dilated_image;
+	dilated_image = dilata_imagem(eroded_image);
 
 	/*Escrevendo a imagem resultante*/
 	
@@ -94,8 +133,8 @@ int main ( int argc, char** argv ) {
 	ss << cont;
 	string str = ss.str();
 	
-	String saida = "..//saida60m2//" + nome;
-	cv:: imwrite(saida, result_image);
+	String saida = "..//saida60m3//" + nome;
+	cv:: imwrite(saida, dilated_image);
 	ss.str("");
 	cont++;
 			

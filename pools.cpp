@@ -31,11 +31,69 @@ cv::Mat convertehsv(Mat image){     //Função para converter uma imagem de rgb 
 
 /*****************************************************************************************************************************************************************/
 
+cv::Mat erode_imagem(Mat image) {	//Função para erodir a imagem e eliminar objetos irrelevantes
+	
+	cv:: Mat erodedImage;
+
+	int raio = 15; // Raio da erosão
+	Mat element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size((2 * raio)+1,(2 * raio)+1), Point(-1,-1));	//Definindo a matriz de dilatação.
+
+	cv::erode(image, erodedImage, element, Point(-1, -1), 1, 1, 1);
+
+	return erodedImage;
+}
+
+/*****************************************************************************************************************************************************************/
+
+cv::Mat dilata_imagem(Mat someImage){    //Função que irá dilatar a imagem no raio escolhido;
+
+    cv::Mat dilated_image;
+
+ 	int raio = 15;	//Raio da dilatação.
+	
+	Mat element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size((2 * raio)+1,(2 * raio)+1), Point(-1,-1));	//Definindo a matriz de dilatação.
+
+	cv::dilate(someImage, dilated_image, element, Point(-1, -1), 1, 1, 1);
+
+    return dilated_image;
+}
+
+/*****************************************************************************************************************************************************************/
+
+cv:: Mat componentes_conexos(Mat image){    //Função que irá realizar a extração dos componentes conexos da imagem;
+    
+    cv::Mat connected_components;
+
+    cv::connectedComponents(image, connected_components, 8, CV_32S, CCL_DEFAULT); //Obter os componentes conexos.
+
+    return connected_components;
+}
+
+/*****************************************************************************************************************************************************************/
+
+int num_componentes(Mat connected_components){      //Função que retorna o número de componentes conexos da imagem;
+
+    int i, j;
+	int num_componentes = 0;
+	for(i = 0; i < 	connected_components.rows; i++){	//Obtendo o número de componentes conexos da imagem.
+		for(j = 0; j < connected_components.cols; j++){
+		if(num_componentes < connected_components.at<int>(i,j)){
+			num_componentes = connected_components.at<int>(i,j);		
+
+			}
+		}
+	}
+
+    return num_componentes;
+}
+
+/*****************************************************************************************************************************************************************/
+
 
 int main ( int argc, char** argv ) {
 
     cv::Mat image;
-	image = leimagem("../imteste2.JPG");
+	image = leimagem("../imteste3.JPG");
 	 // Se não for possível abrir a imagem
 	if(! image.data ) {
 	      std::cout <<  "Could not open or find the image" << std::endl ;
@@ -48,6 +106,7 @@ int main ( int argc, char** argv ) {
 	cv::Mat rgb[3];
 	split(image,rgb); //Separando os canais rgb da imagem
 
+	//BGR
 	cv::Mat blueFilter = rgb[0] - (rgb[1] + rgb[2])/2;
 	/***************************************************************************************************************************/
 	// Binarizando a imagem resultante pelo método de otsu
@@ -58,15 +117,36 @@ int main ( int argc, char** argv ) {
 	cv::Mat segmented_image;
 	cv::threshold(blueFilter, segmented_image, 30, 255, CV_THRESH_BINARY);
 
+	// Obtendo azuis com tons esverdeados na imagem
+	cv:: Mat blueFilter2 = ((rgb[1] - rgb[2]) > 50) & (rgb[0] > 140);
+
 	// Fazendo a operação de "e lógico" entre as duas imagens
 	cv::Mat threshold_image;
 	threshold_image = otsu_image & segmented_image;
 
+	cv::Mat binary_image;
+	binary_image = blueFilter2 | threshold_image;
+
+	// Erodir e dilatar a imagem resultante a fim de eliminar objetos irrelevantes
+
+	cv::Mat eroded_image;
+	eroded_image = erode_imagem(binary_image);
+	
+	// Etapa de dilatação
+	cv::Mat dilated_image;
+	dilated_image = dilata_imagem(eroded_image);
+
+	// Extração de componentes conexos
+	cv:Mat connected_components;
+	connected_components = componentes_conexos(dilated_image);
+
 	/*Escrevendo a imagem resultante*/
 	
-	imwrite("../result.JPG", threshold_image);
-	imwrite("../resultotsu.JPG", otsu_image);
-	imwrite("../resultseg.JPG", segmented_image);
+/***************************************************************************************************************************/
+
+	imwrite("../resultDirty.JPG", binary_image);
+	imwrite("../result.JPG", dilated_image);
+
 	cv::waitKey(0);
     return 0;
 }
