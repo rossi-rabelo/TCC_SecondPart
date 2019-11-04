@@ -140,12 +140,39 @@ int main ( int argc, char** argv ) {
 	cv:Mat connected_components;
 	connected_components = componentes_conexos(dilated_image);
 
+	int numComponentes = num_componentes(connected_components);
+
+	/**************************** Fazer o tratamento da imagem dos componentes conexos ********************************/
+
+
+    //Alocar um  vetor de n posições, sendo n, o número de componentes conexos na imagem.
+	 
+	 int *componentes;
+     componentes = (int *) malloc((numComponentes + 1) * sizeof(int));   //Atribuindo o tamanho do vetor como o valor máximo obtido da imagem
+
+     for(int i = 0; i < (numComponentes + 1); i++){    //Zerando o vetor
+         componentes[i] = 0;
+     } 	
+	
+     //Popular o vetor com os valores da imagem, o vetor no indice i deve conter o tamanho do objeto de valor de i em pixels
+    	
+     int pos;
+
+     for(int i = 0; i < linhas; i++){
+	     for(int j = 0; j < colunas; j++){
+	 	    pos = connected_components.at<int>(i,j);	
+	 	    componentes[pos] = componentes[pos] + 1;
+	 	}		
+	
+     }
+
+    // /******************************************************************************************************************/
+
 	/*Escrevendo a imagem resultante*/
 	
 /***************************************************************************************************************************/
 
-	imwrite("../resultDirty.JPG", binary_image);
-	imwrite("../result.JPG", dilated_image);
+	imwrite("../connectedComponents.JPG", connected_components);
 
 	cv::waitKey(0);
     return 0;
