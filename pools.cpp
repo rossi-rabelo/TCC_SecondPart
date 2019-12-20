@@ -12,6 +12,15 @@ using namespace cv;
 using namespace std;
 
 /*****************************************************************************************************************************************************************/
+//DEFINIÇÃO DE STRUCTURES
+
+typedef struct
+{
+	int codElement;
+	int sizeElement;
+} ComponentSize;
+
+/*****************************************************************************************************************************************************************/
 
 cv::Mat leimagem(String str)
 { //Função para ler uma imagem de nome str
@@ -96,13 +105,28 @@ int num_componentes(Mat connected_components)
 }
 
 /*****************************************************************************************************************************************************************/
-//DEFINIÇÃO DE STRUCTURES
 
-typedef struct
-{
-	int codElement;
-	int sizeElement;
-} ComponentSize;
+void ordenaComponentes(int *componentesCop, int numComponentes, vector<ComponentSize> &imgComponents) {
+	int menor = INT_MAX;
+	int index = 0;
+	ComponentSize auxImgComponents;
+	for (int i = 0; i < numComponentes; i++)
+	{
+		for (int j = 0; j < numComponentes; j++)
+		{
+			if (componentesCop[j] < menor)
+			{
+				menor = componentesCop[j];
+				index = j;
+			}
+		}
+		auxImgComponents.codElement = index;
+		auxImgComponents.sizeElement = menor;
+		imgComponents.push_back(auxImgComponents);
+		componentesCop[index] = INT_MAX;
+		menor = INT_MAX;
+	}
+}
 
 /*****************************************************************************************************************************************************************/
 
@@ -186,30 +210,20 @@ int main(int argc, char **argv)
 	}
 
 	// Depois de obter o array com o tamanho de cada componente, iremos atribui-lo na structure e ordena-lo,
-	ComponentSize imgComponents[numComponentes];
-	// Depois de declararr o novo array, iremos inserir de forma ordenada no vetor
+	vector <ComponentSize> imgComponents;
+	// Depois de declarar o novo array, iremos inserir de forma ordenada no vetor
 	int componentesCop[numComponentes];
 	for (int i = 0; i < numComponentes; i++)
 	{
 		componentesCop[i] = componentes[i];
 	}
-	int menor = INT_MAX;
-	int index = 0;
-	for (int i = 0; i < numComponentes; i++)
-	{
-		for (int j = 0; j < numComponentes; j++)
-		{
-			if (componentesCop[j] < menor)
-			{
-				menor = componentesCop[j];
-				index = j;
-			}
-		}
-		imgComponents[i].codElement = index;
-		imgComponents[i].sizeElement = menor;
-		componentesCop[index] = INT_MAX;
-		menor = INT_MAX;
+	
+	ordenaComponentes(componentesCop, numComponentes, imgComponents);
+
+	for (int i = 0; i < numComponentes; i++) {
+		cout << imgComponents[i].codElement << ' ' << imgComponents[i].sizeElement << endl;
 	}
+
 	// Aqui o vetor imgComponents já está ordenado
 	/******************************************************************************************************************/
 
