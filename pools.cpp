@@ -220,7 +220,7 @@ int main(int argc, char **argv)
 	
 	ordenaComponentes(componentesCop, numComponentes, imgComponents);
 
-	for (int i = 0; i < numComponentes; i++) {
+	for (int i = 0; i < numComponentes - 1 ; i++) {
 		cout << imgComponents[i].codElement << ' ' << imgComponents[i].sizeElement << endl;
 	}
 
@@ -231,7 +231,7 @@ int main(int argc, char **argv)
 
 	/***************************************************************************************************************************/
 
-	imwrite("../connectedComponents.JPG", connected_components);
+	imwrite("../connectedComponentsTest.JPG", connected_components);
 
 	cv::waitKey(0);
 	return 0;
